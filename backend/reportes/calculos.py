@@ -33,7 +33,9 @@ def lineas_vendidas(desde, hasta):
 
 
 def total_vendido(desde, hasta):
-    return sum((d.subtotal for d in lineas_vendidas(desde, hasta)), Decimal('0'))
+    # Solo se leen cantidad y precio: armar cada línea como objeto completo es lo que más tarda.
+    filas = lineas_vendidas(desde, hasta).values_list('cantidad', 'precio_unitario')
+    return sum((cantidad * precio for cantidad, precio in filas), Decimal('0'))
 
 
 def variacion(actual, anterior):
@@ -164,7 +166,13 @@ def reporte_ventas(tipo='mes'):
     duracion = hasta - desde
     desde_anterior = desde - duracion
 
-    lineas = list(lineas_vendidas(desde, hasta))
+    # Se leen solo las columnas que se usan (tuplas, no objetos): con miles de líneas
+    # en el periodo, crear un objeto por línea hacía este reporte varias veces más lento.
+    lineas = lineas_vendidas(desde, hasta).values_list(
+        'pedido_id', 'pedido__fecha', 'pedido__usuario_id',
+        'producto_id', 'producto__nombre', 'producto__categoria__nombre',
+        'cantidad', 'precio_unitario',
+    )
 
     por_periodo = defaultdict(Decimal)
     pedidos_por_periodo = defaultdict(set)
@@ -173,22 +181,26 @@ def reporte_ventas(tipo='mes'):
     pedidos, clientes, productos = set(), set(), set()
     unidades_vendidas = 0
 
-    for linea in lineas:
-        dia = timezone.localtime(linea.pedido.fecha).date()
+    dia_de_pedido = {}
+    for pedido_id, fecha, usuario_id, producto_id, nombre, categoria, cantidad, precio in lineas:
+        subtotal = cantidad * precio
+        if pedido_id not in dia_de_pedido:
+            dia_de_pedido[pedido_id] = timezone.localtime(fecha).date()
+        dia = dia_de_pedido[pedido_id]
         for indice, (inicio, fin, _) in enumerate(barras):
             if inicio <= dia < fin:
-                por_periodo[indice] += linea.subtotal
-                pedidos_por_periodo[indice].add(linea.pedido_id)
+                por_periodo[indice] += subtotal
+                pedidos_por_periodo[indice].add(pedido_id)
                 break
-        producto = linea.producto
-        por_producto[producto.pk]['producto'] = producto
-        por_producto[producto.pk]['unidades'] += linea.cantidad
-        por_producto[producto.pk]['total'] += linea.subtotal
-        por_categoria[producto.categoria.nombre] += linea.subtotal
-        pedidos.add(linea.pedido_id)
-        clientes.add(linea.pedido.usuario_id)
-        productos.add(producto.pk)
-        unidades_vendidas += linea.cantidad
+        por_producto[producto_id]['id'] = producto_id
+        por_producto[producto_id]['nombre'] = nombre
+        por_producto[producto_id]['unidades'] += cantidad
+        por_producto[producto_id]['total'] += subtotal
+        por_categoria[categoria] += subtotal
+        pedidos.add(pedido_id)
+        clientes.add(usuario_id)
+        productos.add(producto_id)
+        unidades_vendidas += cantidad
 
     total = sum(por_periodo.values(), Decimal('0'))
     total_anterior = total_vendido(desde_anterior, desde)
@@ -204,7 +216,8 @@ def reporte_ventas(tipo='mes'):
     apartadas_ahora = Producto.objects.aggregate(total=Sum('stock_apartado'))['total'] or 0
     base_conversion = unidades_vendidas + unidades_canceladas
 
-    mas_vendidos = sorted(por_producto.values(), key=lambda p: (-p['total'], p['producto'].nombre))[:5]
+    mas_vendidos = sorted(por_producto.values(), key=lambda p: (-p['total'], p['nombre']))[:5]
+    destacados = Producto.objects.in_bulk([p['id'] for p in mas_vendidos])
 
     # Serie del otro sistema (solo si la integración está conectada).
     # Se pide por fechas en formato date, inclusivo en ambos extremos.
@@ -279,9 +292,9 @@ def reporte_ventas(tipo='mes'):
         ],
         'mas_vendidos': [
             {
-                'id': p['producto'].pk,
-                'nombre': p['producto'].nombre,
-                'presentacion': p['producto'].presentacion,
+                'id': p['id'],
+                'nombre': p['nombre'],
+                'presentacion': destacados[p['id']].presentacion,
                 'unidades': p['unidades'],
                 'total': p['total'],
             }
