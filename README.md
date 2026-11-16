@@ -69,8 +69,8 @@ y comprueban que nunca se aparta más de lo que hay. Necesitan MySQL: con SQLite
 
 | Parte | Servicio | Detalle |
 |-------|----------|---------|
-| Base de datos | Azure Database for MySQL, servidor flexible B1ms (Azure for Students, 12 meses gratis) | MySQL 8.4 en la nube, conexión cifrada (SSL); el firewall solo deja entrar las IP de salida de Render |
-| Backend | Render, *Web Service* gratis | `backend/build.sh` instala, aplica migraciones y carga los datos de demostración si la base está vacía; corre con gunicorn |
+| Base de datos | Azure Database for MySQL, servidor flexible B1ms en France Central (Azure for Students, 12 meses gratis) | MySQL 8.4 en la nube, conexión cifrada (SSL); el firewall solo deja entrar las IP de salida de Render |
+| Backend | Render, *Web Service* gratis en Frankfurt | `backend/build.sh` instala, aplica migraciones y carga los datos de demostración si la base está vacía; corre con gunicorn |
 | Frontend | Render, *Static Site* | `npm ci && npm run build`; todas las rutas sirven `index.html` |
 
 `render.yaml` describe los dos servicios de Render (Blueprint). Los datos de la base se escriben en el panel de Render,

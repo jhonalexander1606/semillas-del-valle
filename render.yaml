@@ -6,6 +6,8 @@ services:
     name: semillas-del-valle-api
     runtime: python
     plan: free
+    # Cerca de la base en Azure (France Central): menos latencia en cada consulta.
+    region: frankfurt
     rootDir: backend
     buildCommand: ./build.sh
     startCommand: gunicorn config.wsgi:application --workers 2 --timeout 120
