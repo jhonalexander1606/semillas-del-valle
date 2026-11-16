@@ -227,6 +227,26 @@ class PedidosTests(BasePedidos):
         self.assertEqual(len(self.client.get('/api/pedidos/').data), 2)
         self.assertEqual(len(self.client.get('/api/pedidos/?buscar=pedro').data), 1)
 
+    def test_lista_paginada_devuelve_una_pagina_y_el_total(self):
+        for _ in range(3):
+            self.comprar(self.cliente, self.tomate, 1)
+
+        primera = self.client.get('/api/pedidos/?pagina=1&por_pagina=2').data
+        segunda = self.client.get('/api/pedidos/?pagina=2&por_pagina=2').data
+
+        self.assertEqual((primera['total'], len(primera['resultados']), primera['hay_mas']), (3, 2, True))
+        self.assertEqual((segunda['total'], len(segunda['resultados']), segunda['hay_mas']), (3, 1, False))
+        ids = [p['id'] for p in primera['resultados'] + segunda['resultados']]
+        self.assertEqual(len(set(ids)), 3)
+
+    def test_lista_paginada_respeta_filtros_y_busqueda(self):
+        self.comprar(self.cliente, self.tomate, 1)
+        self.comprar(self.otro, self.lechuga, 1)
+        self.client.force_authenticate(self.admin)
+
+        datos = self.client.get('/api/pedidos/?pagina=1&buscar=pedro&estado=2').data
+        self.assertEqual((datos['total'], len(datos['resultados'])), (1, 1))
+
     def test_admin_completa_un_pedido_en_proceso(self):
         pedido_id = self.agregar(self.tomate, 3).data['id']
         self.client.force_authenticate(self.admin)

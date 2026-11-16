@@ -17,6 +17,9 @@ from .serializers import (
     respuesta_stock_insuficiente,
 )
 
+PEDIDOS_POR_PAGINA = 20
+PEDIDOS_POR_PAGINA_MAX = 100
+
 CARRITO_VACIO = {
     'id': None, 'codigo': None, 'fecha': None, 'estado': Pedido.Estado.EN_PROCESO, 'estado_nombre': 'En proceso',
     'detalles': [], 'unidades': 0, 'total': 0, 'reservado_hasta': None,
@@ -126,7 +129,7 @@ class CancelarCarritoView(APIView):
 
 class PedidoViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    GET  /api/pedidos/                     — historial (?estado=0|1|2 &buscar= &limite=)
+    GET  /api/pedidos/                     — historial (?estado=0|1|2 &buscar= &limite= &pagina= &por_pagina=)
     GET  /api/pedidos/<id>/                — detalle
     POST /api/pedidos/<id>/cancelar/       — cancelar
     POST /api/pedidos/<id>/estado/         — {estado}: «Actualizar estado del pedido» (administrador)
@@ -159,7 +162,26 @@ class PedidoViewSet(viewsets.ReadOnlyModelViewSet):
 
     def list(self, request, *args, **kwargs):
         pedidos = self.get_queryset()
-        limite = request.query_params.get('limite', '')
+        parametros = request.query_params
+
+        # ?pagina=N: devuelve solo una página y el total. Así la lista del administrador
+        # no manda miles de pedidos en cada consulta.
+        pagina = parametros.get('pagina', '')
+        if pagina.isdigit():
+            pagina = max(int(pagina), 1)
+            por_pagina = parametros.get('por_pagina', '')
+            por_pagina = min(int(por_pagina), PEDIDOS_POR_PAGINA_MAX) if por_pagina.isdigit() and int(por_pagina) > 0 else PEDIDOS_POR_PAGINA
+            total = pedidos.count()
+            inicio = (pagina - 1) * por_pagina
+            return Response({
+                'total': total,
+                'pagina': pagina,
+                'por_pagina': por_pagina,
+                'hay_mas': inicio + por_pagina < total,
+                'resultados': self.get_serializer(pedidos[inicio:inicio + por_pagina], many=True).data,
+            })
+
+        limite = parametros.get('limite', '')
         if limite.isdigit():
             pedidos = pedidos[: int(limite)]
         return Response(self.get_serializer(pedidos, many=True).data)

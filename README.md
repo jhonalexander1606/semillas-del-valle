@@ -61,7 +61,7 @@ cd backend
 python manage.py test
 ```
 
-Son 90 pruebas. Corren sobre MySQL (base temporal `test_semillero`). Las tres de `pedidos/test_concurrencia.py`
+Son 92 pruebas. Corren sobre MySQL (base temporal `test_semillero`). Las tres de `pedidos/test_concurrencia.py`
 ponen a diez clientes a comprar el mismo producto al mismo tiempo, cada uno en su hilo y con su propia conexión,
 y comprueban que nunca se aparta más de lo que hay. Necesitan MySQL: con SQLite se omiten porque SQLite no bloquea filas.
 

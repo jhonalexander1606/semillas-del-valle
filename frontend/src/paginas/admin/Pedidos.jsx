@@ -40,8 +40,11 @@ export default function Pedidos() {
   const [texto, setTexto] = useState('');
   const [buscar, setBuscar] = useState('');
   const [pedidos, setPedidos] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [pagina, setPagina] = useState(1);
+  const [hayMas, setHayMas] = useState(false);
+  const [cargandoMas, setCargandoMas] = useState(false);
   const [estado, setEstado] = useState('cargando');
-  const [visibles, setVisibles] = useState(POR_PAGINA);
   const [abierto, setAbierto] = useState(null);
   const [cambio, setCambio] = useState(null); // { pedido, estado }
   const [ocupado, setOcupado] = useState(false);
@@ -54,19 +57,47 @@ export default function Pedidos() {
     return () => clearTimeout(espera);
   }, [texto]);
 
+  // El servidor devuelve los pedidos de a una página (20) con el total.
+  const consultar = useCallback(
+    (numero) => {
+      const consulta = new URLSearchParams({ pagina: numero, por_pagina: POR_PAGINA });
+      if (filtro) consulta.set('estado', filtro);
+      if (buscar) consulta.set('buscar', buscar);
+      return api(`/pedidos/?${consulta}`);
+    },
+    [filtro, buscar],
+  );
+
   const cargar = useCallback(() => {
-    const consulta = new URLSearchParams();
-    if (filtro) consulta.set('estado', filtro);
-    if (buscar) consulta.set('buscar', buscar);
     setEstado('cargando');
-    api(`/pedidos/?${consulta}`)
-      .then((lista) => {
-        setPedidos(lista);
-        setVisibles(POR_PAGINA);
+    consultar(1)
+      .then((datos) => {
+        setPedidos(datos.resultados);
+        setTotal(datos.total);
+        setPagina(1);
+        setHayMas(datos.hay_mas);
         setEstado('listo');
       })
       .catch(() => setEstado('error'));
-  }, [filtro, buscar]);
+  }, [consultar]);
+
+  async function cargarMas() {
+    setCargandoMas(true);
+    try {
+      const datos = await consultar(pagina + 1);
+      setPedidos((lista) => {
+        const vistos = new Set(lista.map((p) => p.id));
+        return [...lista, ...datos.resultados.filter((p) => !vistos.has(p.id))];
+      });
+      setTotal(datos.total);
+      setPagina(pagina + 1);
+      setHayMas(datos.hay_mas);
+    } catch (error) {
+      avisar(error.message, { tono: 'error' });
+    } finally {
+      setCargandoMas(false);
+    }
+  }
 
   useEffect(cargar, [cargar]);
 
@@ -148,7 +179,7 @@ export default function Pedidos() {
           </button>
         </section>
       ) : (
-        <BloqueTabla id="titulo-lista-pedidos" titulo={estado === 'cargando' ? 'Pedidos' : contar(pedidos.length, 'pedido', 'pedidos')}>
+        <BloqueTabla id="titulo-lista-pedidos" titulo={estado === 'cargando' ? 'Pedidos' : contar(total, 'pedido', 'pedidos')}>
           <thead>
             <tr>
               <th scope="col" className={TH}>Pedido</th>
@@ -169,7 +200,7 @@ export default function Pedidos() {
                 </td>
               </tr>
             )}
-            {pedidos.slice(0, visibles).map((p) => {
+            {pedidos.map((p) => {
               const expandido = abierto === p.id;
               return (
                 <Fragment key={p.id}>
@@ -249,13 +280,14 @@ export default function Pedidos() {
         </BloqueTabla>
       )}
 
-      {visibles < pedidos.length && (
+      {estado === 'listo' && hayMas && (
         <button
           type="button"
-          onClick={() => setVisibles((n) => n + POR_PAGINA)}
-          className="self-center rounded-full border border-borde-input bg-white px-6 py-2.5 text-sm font-semibold text-tinta-media hover:bg-crema"
+          onClick={cargarMas}
+          disabled={cargandoMas}
+          className="self-center rounded-full border border-borde-input bg-white px-6 py-2.5 text-sm font-semibold text-tinta-media hover:bg-crema disabled:opacity-60"
         >
-          Mostrar más pedidos ({pedidos.length - visibles} restantes)
+          {cargandoMas ? 'Cargando…' : `Mostrar más pedidos (${total - pedidos.length} restantes)`}
         </button>
       )}
 

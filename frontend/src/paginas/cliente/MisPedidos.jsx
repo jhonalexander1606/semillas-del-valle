@@ -79,25 +79,58 @@ export function DetalleLineas({ pedido }) {
 export default function MisPedidos() {
   const [filtro, setFiltro] = useState('');
   const [pedidos, setPedidos] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [pagina, setPagina] = useState(1);
+  const [hayMas, setHayMas] = useState(false);
+  const [cargandoMas, setCargandoMas] = useState(false);
   const [estado, setEstado] = useState('cargando');
   const [abierto, setAbierto] = useState(null);
-  const [visibles, setVisibles] = useState(POR_PAGINA);
   const [porCancelar, setPorCancelar] = useState(null);
   const [cancelando, setCancelando] = useState(false);
   const [errorCancelar, setErrorCancelar] = useState('');
   const { recargar } = useCarrito();
   const avisar = useAvisos();
 
+  // El servidor devuelve el historial de a una página con el total.
+  const consultar = useCallback(
+    (numero) => {
+      const consulta = new URLSearchParams({ pagina: numero, por_pagina: POR_PAGINA });
+      if (filtro) consulta.set('estado', filtro);
+      return api(`/pedidos/?${consulta}`);
+    },
+    [filtro],
+  );
+
   const cargar = useCallback(() => {
     setEstado('cargando');
-    api(`/pedidos/${filtro ? `?estado=${filtro}` : ''}`)
-      .then((lista) => {
-        setPedidos(lista);
-        setVisibles(POR_PAGINA);
+    consultar(1)
+      .then((datos) => {
+        setPedidos(datos.resultados);
+        setTotal(datos.total);
+        setPagina(1);
+        setHayMas(datos.hay_mas);
         setEstado('listo');
       })
       .catch(() => setEstado('error'));
-  }, [filtro]);
+  }, [consultar]);
+
+  async function cargarMas() {
+    setCargandoMas(true);
+    try {
+      const datos = await consultar(pagina + 1);
+      setPedidos((lista) => {
+        const vistos = new Set(lista.map((p) => p.id));
+        return [...lista, ...datos.resultados.filter((p) => !vistos.has(p.id))];
+      });
+      setTotal(datos.total);
+      setPagina(pagina + 1);
+      setHayMas(datos.hay_mas);
+    } catch (error) {
+      avisar(error.message, { tono: 'error' });
+    } finally {
+      setCargandoMas(false);
+    }
+  }
 
   useEffect(cargar, [cargar]);
 
@@ -122,7 +155,7 @@ export default function MisPedidos() {
   return (
     <>
       <Encabezado
-        antetitulo={estado === 'listo' ? contar(pedidos.length, 'pedido', 'pedidos') : 'Tu historial'}
+        antetitulo={estado === 'listo' ? contar(total, 'pedido', 'pedidos') : 'Tu historial'}
         titulo="Mis pedidos"
       />
 
@@ -151,7 +184,7 @@ export default function MisPedidos() {
 
       {pedidos.length > 0 && (
         <ul aria-busy={estado === 'cargando'} className="divide-y divide-linea overflow-hidden rounded-3xl border border-borde bg-crema-claro">
-          {pedidos.slice(0, visibles).map((pedido) => {
+          {pedidos.map((pedido) => {
             const expandido = abierto === pedido.id;
             const enProceso = pedido.estado === 1;
             return (
@@ -212,13 +245,14 @@ export default function MisPedidos() {
         </ul>
       )}
 
-      {visibles < pedidos.length && (
+      {estado === 'listo' && hayMas && (
         <button
           type="button"
-          onClick={() => setVisibles((n) => n + POR_PAGINA)}
-          className="self-center rounded-full border border-borde-input bg-white px-6 py-2.5 text-sm font-semibold text-tinta-media hover:bg-crema"
+          onClick={cargarMas}
+          disabled={cargandoMas}
+          className="self-center rounded-full border border-borde-input bg-white px-6 py-2.5 text-sm font-semibold text-tinta-media hover:bg-crema disabled:opacity-60"
         >
-          Mostrar más pedidos ({pedidos.length - visibles} restantes)
+          {cargandoMas ? 'Cargando…' : `Mostrar más pedidos (${total - pedidos.length} restantes)`}
         </button>
       )}
 
