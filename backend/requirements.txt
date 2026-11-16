@@ -1,0 +1,12 @@
+Django>=5.2,<5.3
+djangorestframework>=3.15
+djangorestframework-simplejwt>=5.3
+# Conector de MySQL escrito en Python: se instala igual en Windows, Linux y Render, sin compilar nada.
+PyMySQL>=1.1
+cryptography>=42
+python-dotenv>=1.0
+requests>=2.32
+# Despliegue: servidor web, archivos estáticos y permiso para que el frontend (otro dominio) llame a la API.
+gunicorn>=23
+whitenoise>=6.7
+django-cors-headers>=4.4

@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+/* Colores y fuentes de Semillas del Valle (generan clases como bg-verde, text-tinta, font-titulos) */
+@theme {
+  --color-crema: #F7F5F0;
+  --color-crema-claro: #FFFDF8;
+  --color-crema-oscuro: #F4F0E7;
+  --color-verde: #2E6F4F;
+  --color-verde-oscuro: #275F43;
+  --color-verde-hover: #1F4F37;
+  --color-verde-suave: #E3EDE6;
+  --color-verde-texto: #DCEBE1;
+  --color-menu: #E6F0EA;
+  --color-naranja: #D9762B;
+  --color-naranja-fondo: #FCEAD4;
+  --color-naranja-borde: #F2C894;
+  --color-naranja-texto: #6E3608;
+  --color-naranja-suave: #5E3B1A;
+  --color-naranja-punto: #C2410C;
+  --color-error: #A3390F;
+  --color-error-fondo: #FBEAE3;
+  --color-tinta: #22251F;
+  --color-tinta-titulo: #1F2A22;
+  --color-tinta-media: #4A4943;
+  --color-tinta-suave: #6B6A63;
+  --color-tinta-etiqueta: #3B3A35;
+  --color-gris: #5C5B54;
+  --color-borde: #E6E0D3;
+  --color-borde-input: #D9D2C3;
+  --color-linea: #EEE9DE;
+
+  --font-titulos: "Fraunces Variable", "Fraunces", Georgia, serif;
+  --font-texto: "DM Sans Variable", "DM Sans", system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-crema);
+    color: var(--color-tinta);
+    font-family: var(--font-texto);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-naranja);
+    outline-offset: 2px;
+  }
+}
+
+/* Borde dentado de arriba, como el de un sobre de semillas. */
+@layer components {
+  .sobre {
+    --diente: 12px;
+    --alto-diente: 7px;
+    -webkit-mask:
+      conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top left / var(--diente) var(--alto-diente) repeat-x,
+      linear-gradient(#000 0 0) left var(--alto-diente) / 100% calc(100% - var(--alto-diente)) no-repeat;
+    mask:
+      conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top left / var(--diente) var(--alto-diente) repeat-x,
+      linear-gradient(#000 0 0) left var(--alto-diente) / 100% calc(100% - var(--alto-diente)) no-repeat;
+  }
+}
+
+/* Avisos que aparecen abajo al agregar al carrito, confirmar, etc. */
+@keyframes entrar-aviso {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .aviso-flotante {
+    animation: entrar-aviso 180ms ease-out;
+  }
+}
+
+dialog::backdrop {
+  background: rgb(34 37 31 / 0.45);
+}

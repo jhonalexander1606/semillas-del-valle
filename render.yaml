@@ -1,0 +1,57 @@
+# Despliegue en Render (plan gratis): backend Django + frontend React.
+# La base de datos MySQL está en Aiven (plan gratis); sus datos se escriben en el panel de Render,
+# nunca en este archivo.
+services:
+  - type: web
+    name: semillas-del-valle-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: ./build.sh
+    startCommand: gunicorn config.wsgi:application --workers 2 --timeout 120
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.5
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: TIME_ZONE
+        value: America/Bogota
+      - key: DB_ENGINE
+        value: mysql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_SSL_CA
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: API_INTEGRACION_TOKEN
+        generateValue: true
+      - key: CARGAR_DATOS_DEMO
+        value: "True"
+
+  - type: web
+    name: semillas-del-valle
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    routes:
+      # React maneja las rutas (/cliente, /admin/...): todas sirven index.html.
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: VITE_API_URL
+        sync: false
