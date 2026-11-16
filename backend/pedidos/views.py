@@ -170,7 +170,10 @@ class PedidoViewSet(viewsets.ReadOnlyModelViewSet):
         if pagina.isdigit():
             pagina = max(int(pagina), 1)
             por_pagina = parametros.get('por_pagina', '')
-            por_pagina = min(int(por_pagina), PEDIDOS_POR_PAGINA_MAX) if por_pagina.isdigit() and int(por_pagina) > 0 else PEDIDOS_POR_PAGINA
+            if por_pagina.isdigit() and int(por_pagina) > 0:
+                por_pagina = min(int(por_pagina), PEDIDOS_POR_PAGINA_MAX)
+            else:
+                por_pagina = PEDIDOS_POR_PAGINA
             total = pedidos.count()
             inicio = (pagina - 1) * por_pagina
             return Response({
