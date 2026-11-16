@@ -116,12 +116,17 @@ else:
             'TEST': {'CHARSET': 'utf8mb4', 'COLLATION': 'utf8mb4_unicode_ci'},
         }
     }
-    # Bases en la nube (Aiven) exigen conexión cifrada. DB_SSL_CA trae el certificado CA (texto PEM)
-    # que entrega el proveedor; se guarda en un archivo para que el conector lo use.
+    # Las bases en la nube exigen conexión cifrada (SSL). Con DB_SSL=True se usan las CA públicas;
+    # DB_SSL_CA sirve si el proveedor entrega su propio certificado CA (texto PEM).
     if os.getenv('DB_SSL_CA'):
         ruta_ca = BASE_DIR / 'db-ca.pem'
         ruta_ca.write_text(os.getenv('DB_SSL_CA').replace('\\n', '\n'))
         DATABASES['default']['OPTIONS']['ssl'] = {'ca': str(ruta_ca)}
+    elif os.getenv('DB_SSL', 'False').lower() == 'true':
+        # Azure Database for MySQL usa certificados de autoridades públicas: basta con las CA de certifi.
+        import certifi
+
+        DATABASES['default']['OPTIONS']['ssl'] = {'ca': certifi.where()}
 
 
 # Usuarios y contraseñas

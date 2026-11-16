@@ -65,11 +65,11 @@ Son 90 pruebas. Corren sobre MySQL (base temporal `test_semillero`). Las tres de
 ponen a diez clientes a comprar el mismo producto al mismo tiempo, cada uno en su hilo y con su propia conexión,
 y comprueban que nunca se aparta más de lo que hay. Necesitan MySQL: con SQLite se omiten porque SQLite no bloquea filas.
 
-## Despliegue (gratis): Render + Aiven
+## Despliegue (gratis): Render + Azure
 
 | Parte | Servicio | Detalle |
 |-------|----------|---------|
-| Base de datos | Aiven for MySQL, plan gratis | MySQL 8 en la nube, conexión cifrada (SSL) |
+| Base de datos | Azure Database for MySQL, servidor flexible B1ms (Azure for Students, 12 meses gratis) | MySQL 8.4 en la nube, conexión cifrada (SSL); el firewall solo deja entrar las IP de salida de Render |
 | Backend | Render, *Web Service* gratis | `backend/build.sh` instala, aplica migraciones y carga los datos de demostración si la base está vacía; corre con gunicorn |
 | Frontend | Render, *Static Site* | `npm ci && npm run build`; todas las rutas sirven `index.html` |
 
@@ -78,8 +78,9 @@ nunca en el repositorio:
 
 | Variable (backend) | Valor |
 |--------------------|-------|
-| `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` | Los de la conexión del servicio MySQL en Aiven |
-| `DB_SSL_CA` | El certificado CA de Aiven (texto completo del archivo `ca.pem`) |
+| `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` | Ya están en `render.yaml` (servidor `semillas-del-valle-db.mysql.database.azure.com`) |
+| `DB_PASSWORD` | La contraseña del administrador del servidor de Azure (solo en el panel de Render) |
+| `DB_SSL` | `True`: Azure exige conexión cifrada |
 | `CORS_ALLOWED_ORIGINS` | La dirección del frontend, por ejemplo `https://semillas-del-valle.onrender.com` |
 
 | Variable (frontend) | Valor |
