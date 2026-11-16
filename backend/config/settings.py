@@ -114,6 +114,10 @@ else:
             'PORT': os.getenv('DB_PORT', '3306'),
             'OPTIONS': {'charset': 'utf8mb4'},
             'TEST': {'CHARSET': 'utf8mb4', 'COLLATION': 'utf8mb4_unicode_ci'},
+            # Reutiliza la conexión entre peticiones (por defecto Django abre una nueva cada vez).
+            # Con la base en la nube y SSL, abrir la conexión era la mayor parte del tiempo de respuesta.
+            'CONN_MAX_AGE': int(os.getenv('DB_CONN_MAX_AGE', '60')),
+            'CONN_HEALTH_CHECKS': True,
         }
     }
     # Las bases en la nube exigen conexión cifrada (SSL). Con DB_SSL=True se usan las CA públicas;
