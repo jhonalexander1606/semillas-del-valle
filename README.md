@@ -54,16 +54,21 @@ npm run dev
 Abre `http://localhost:5173`. Las llamadas a `/api` se reenvían a Django automáticamente.
 Las fuentes vienen dentro del proyecto, así que la app se ve igual sin internet.
 
-## Pruebas automáticas
+## Pruebas
 
-```bash
-cd backend
-python manage.py test
-```
+Antes: la base creada con `crear_bd.sql`, el archivo `.env` y `python manage.py migrate` (pasos de arriba).
 
-Son 92 pruebas. Corren sobre MySQL (base temporal `test_semillero`). Las tres de `pedidos/test_concurrencia.py`
+| Prueba | Cómo se corre | Qué se espera |
+|--------|---------------|---------------|
+| Unitarias, de integración, de concurrencia y de flujo completo | `cd backend` y `python manage.py test` | `Ran 93 tests` y `OK` |
+| Solo el flujo completo (los 12 pasos del informe) | `python manage.py test pedidos.test_flujo_completo` | `OK` |
+| Solo la compra simultánea | `python manage.py test pedidos.test_concurrencia` | `OK` (necesita MySQL) |
+| Aceptación | A mano en el navegador, con las cuentas de demostración, siguiendo los casos del informe | El resultado esperado de cada caso |
+| Carga | Iniciar sesión como administrador, abrir la consola (F12) y pegar `pruebas/prueba_carga.js` | Una tabla con la mediana, el 95 % y los errores para 1, 5 y 20 usuarios |
+
+Las pruebas automáticas corren sobre MySQL (base temporal `test_semillero`). Las tres de `pedidos/test_concurrencia.py`
 ponen a diez clientes a comprar el mismo producto al mismo tiempo, cada uno en su hilo y con su propia conexión,
-y comprueban que nunca se aparta más de lo que hay. Necesitan MySQL: con SQLite se omiten porque SQLite no bloquea filas.
+y comprueban que nunca se aparta más de lo que hay. Con SQLite se omiten, porque SQLite no bloquea filas.
 
 ## Despliegue (gratis): Render + Azure
 
@@ -174,17 +179,6 @@ API_INTEGRACION_TOKEN=el-token-que-les-damos
 - `estado` debe ser `en_proceso`, `completado` o `cancelado`.
 - Si su ruta o su JSON son distintos, el único archivo que hay que adaptar es `backend/integracion/cliente.py`.
 - Si su sistema no responde, el informe lo avisa y muestra solo los pedidos propios.
-
-## Pruebas
-
-```bash
-cd backend
-python manage.py test
-```
-
-Son 87 pruebas: usuarios y sesión, catálogo, carrito y stock, pedidos, liberación de carritos, reportes, informes, conexión con el otro sistema y datos de demostración.
-Usan una base temporal (`test_semillero`); el script `crear_bd.sql` ya da los permisos.
-Para probar sin MySQL, antes del comando: `$env:DB_ENGINE = "sqlite"` en PowerShell o `set DB_ENGINE=sqlite` en CMD.
 
 ## Cómo está organizado el código
 
