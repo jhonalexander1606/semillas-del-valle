@@ -60,7 +60,7 @@ Antes: la base creada con `crear_bd.sql`, el archivo `.env` y `python manage.py 
 
 | Prueba | Cómo se corre | Qué se espera |
 |--------|---------------|---------------|
-| Unitarias, de integración, de concurrencia y de flujo completo | `cd backend` y `python manage.py test` | `Ran 93 tests` y `OK` |
+| Unitarias, de integración, de concurrencia y de flujo completo | `cd backend` y `python manage.py test` | `Ran 94 tests` y `OK` |
 | Solo el flujo completo (los 12 pasos del informe) | `python manage.py test pedidos.test_flujo_completo` | `OK` |
 | Solo la compra simultánea | `python manage.py test pedidos.test_concurrencia` | `OK` (necesita MySQL) |
 | Aceptación | A mano en el navegador, con las cuentas de demostración, siguiendo los casos del informe | El resultado esperado de cada caso |
