@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { api, erroresDeCampos } from '../../api/cliente.js';
 import { AvisoError, CampoSelect, CampoTexto } from '../../componentes/Campos.jsx';
+import { Miniatura } from '../../componentes/Sobre.jsx';
 
 const VACIO = {
   nombre: '',
@@ -12,9 +13,10 @@ const VACIO = {
   precio_unitario: '',
   stock_disponible: '',
   fecha_vencimiento: '',
+  imagen_url: '',
 };
 
-const ORDEN = ['nombre', 'categoria', 'marca', 'contenido', 'unidad_medida', 'precio_unitario', 'stock_disponible', 'fecha_vencimiento'];
+const ORDEN = ['nombre', 'categoria', 'marca', 'contenido', 'unidad_medida', 'precio_unitario', 'stock_disponible', 'fecha_vencimiento', 'imagen_url'];
 
 function desdeProducto(producto) {
   if (!producto) return VACIO;
@@ -27,6 +29,7 @@ function desdeProducto(producto) {
     precio_unitario: String(Number(producto.precio_unitario)),
     stock_disponible: String(producto.stock_disponible),
     fecha_vencimiento: producto.fecha_vencimiento ?? '',
+    imagen_url: producto.imagen_url ?? '',
   };
 }
 
@@ -39,6 +42,9 @@ function validar(datos) {
   if (!(Number(datos.precio_unitario) > 0)) errores.precio_unitario = 'Escribe un precio mayor que cero.';
   if (datos.stock_disponible === '' || !Number.isInteger(Number(datos.stock_disponible)) || Number(datos.stock_disponible) < 0) {
     errores.stock_disponible = 'Escribe un número entero (0 o más).';
+  }
+  if (datos.imagen_url.trim() && !/^https?:\/\/\S+$/i.test(datos.imagen_url.trim())) {
+    errores.imagen_url = 'Pega una dirección que empiece por http:// o https://.';
   }
   return errores;
 }
@@ -82,6 +88,7 @@ export default function FormularioProducto({ producto, categorias, marcas, onGua
       precio_unitario: Number(datos.precio_unitario),
       stock_disponible: Number(datos.stock_disponible),
       fecha_vencimiento: datos.fecha_vencimiento || null,
+      imagen_url: datos.imagen_url.trim(),
     };
     try {
       const guardado = await api(editando ? `/productos/${producto.id}/` : '/productos/', {
@@ -194,6 +201,28 @@ export default function FormularioProducto({ producto, categorias, marcas, onGua
           error={errores.fecha_vencimiento}
           className="sm:col-span-2"
         />
+
+        <div className="flex items-end gap-4 sm:col-span-2 lg:col-span-4">
+          <CampoTexto
+            id="producto-imagen_url"
+            name="imagen_url"
+            type="url"
+            inputMode="url"
+            etiqueta="Foto del producto (opcional)"
+            placeholder="https://…/foto.jpg"
+            value={datos.imagen_url}
+            onChange={cambiar}
+            error={errores.imagen_url}
+            ayuda="Pega la dirección de una foto. Si la dejas vacía se muestra el dibujo de la categoría."
+            className="flex-1"
+          />
+          <Miniatura
+            key={datos.imagen_url}
+            categoria={categorias.find((c) => String(c.id) === datos.categoria)?.nombre}
+            imagen={datos.imagen_url.trim()}
+            className="mb-6 size-16 rounded-2xl"
+          />
+        </div>
 
         <div className="sm:col-span-2 lg:col-span-4">
           <AvisoError>{errores.general}</AvisoError>

@@ -83,6 +83,21 @@ class CatalogoTests(APITestCase):
         # El stock apartado no se puede tocar a mano.
         self.assertEqual(editado.data['stock_apartado'], 0)
 
+    def test_foto_del_producto(self):
+        self.client.force_authenticate(self.admin)
+        url = 'https://ejemplo.test/fotos/papaya.jpg'
+        editado = self.client.patch(f'/api/productos/{self.papaya.pk}/', {'imagen_url': url}, format='json')
+        self.assertEqual(editado.data['imagen_url'], url)
+
+        malo = self.client.patch(f'/api/productos/{self.papaya.pk}/', {'imagen_url': 'no es una dirección'}, format='json')
+        self.assertEqual(malo.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('imagen_url', malo.data)
+
+        # El cliente la ve en el catálogo; un producto sin foto la trae vacía.
+        self.client.force_authenticate(self.cliente)
+        fotos = {p['nombre']: p['imagen_url'] for p in self.client.get('/api/productos/').data}
+        self.assertEqual(fotos, {'Papaya Tainung': url, 'Pasto Brachiaria': ''})
+
     def test_validaciones_del_producto(self):
         self.client.force_authenticate(self.admin)
         self.nuevo.update(precio_unitario=0, contenido=0)

@@ -24,6 +24,7 @@ class DetalleSerializer(serializers.Serializer):
             'presentacion': producto.presentacion,
             'marca': producto.marca.nombre,
             'categoria': producto.categoria.nombre,
+            'imagen_url': producto.imagen_url,
             'cantidad': detalle.cantidad,
             'precio_unitario': precio,
             'subtotal': precio * detalle.cantidad,

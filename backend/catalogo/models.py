@@ -67,6 +67,10 @@ class Producto(models.Model):
         help_text='Cantidad de la presentación: 50 (g), 1 (kg), 1 (unidad)...',
     )
     fecha_vencimiento = models.DateField('fecha de vencimiento', null=True, blank=True)
+    imagen_url = models.URLField(
+        'foto (URL)', max_length=500, blank=True, default='', db_column='prod_imagen_url',
+        help_text='Dirección de una foto del producto. Si se deja vacía se muestra la ilustración de la categoría.',
+    )
 
     class Meta:
         db_table = 'producto'

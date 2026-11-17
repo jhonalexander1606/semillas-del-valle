@@ -72,7 +72,7 @@ class ProductoSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'nombre', 'categoria', 'categoria_nombre', 'marca', 'marca_nombre',
             'presentacion', 'unidad_medida', 'contenido', 'precio_unitario',
-            'stock_disponible', 'stock_apartado', 'fecha_vencimiento', 'estado_stock', 'por_vencer',
+            'stock_disponible', 'stock_apartado', 'fecha_vencimiento', 'imagen_url', 'estado_stock', 'por_vencer',
         ]
         # El stock apartado solo lo mueven el carrito y los pedidos.
         read_only_fields = ['stock_apartado']
@@ -113,6 +113,6 @@ class ProductoCatalogoSerializer(ProductoSerializer):
     class Meta(ProductoSerializer.Meta):
         fields = [
             'id', 'nombre', 'categoria', 'categoria_nombre', 'marca', 'marca_nombre',
-            'presentacion', 'precio_unitario', 'stock_disponible', 'fecha_vencimiento', 'estado_stock',
+            'presentacion', 'precio_unitario', 'stock_disponible', 'fecha_vencimiento', 'imagen_url', 'estado_stock',
         ]
         read_only_fields = fields

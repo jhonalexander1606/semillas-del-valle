@@ -6,6 +6,7 @@ import { useAvisos } from '../../componentes/Avisos.jsx';
 import Dialogo from '../../componentes/Dialogo.jsx';
 import Encabezado from '../../componentes/Encabezado.jsx';
 import Icono from '../../componentes/Icono.jsx';
+import { Miniatura } from '../../componentes/Sobre.jsx';
 import { BloqueTabla, Etiqueta, FILA, TD, TH } from '../../componentes/Tabla.jsx';
 import { contar, formatoDia, pesos } from '../../utilidades/formato.js';
 import FormularioProducto from './FormularioProducto.jsx';
@@ -197,8 +198,13 @@ export default function Productos() {
               visibles.map((p) => (
                 <tr key={p.id} className={FILA}>
                   <td className={TD}>
-                    <span className="font-semibold text-tinta">{p.nombre}</span> <span className="text-tinta-suave">{p.presentacion}</span>
-                    <span className="block text-[13px] text-tinta-suave">{p.marca_nombre}</span>
+                    <span className="flex items-center gap-3">
+                      <Miniatura categoria={p.categoria_nombre} imagen={p.imagen_url} className="size-11 rounded-xl" />
+                      <span>
+                        <span className="font-semibold text-tinta">{p.nombre}</span> <span className="text-tinta-suave">{p.presentacion}</span>
+                        <span className="block text-[13px] text-tinta-suave">{p.marca_nombre}</span>
+                      </span>
+                    </span>
                   </td>
                   <td className={`${TD} whitespace-nowrap`}>{p.categoria_nombre}</td>
                   <td className={`${TD} text-right tabular-nums`}>{pesos(p.precio_unitario)}</td>

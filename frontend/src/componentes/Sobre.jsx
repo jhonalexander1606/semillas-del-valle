@@ -1,6 +1,8 @@
 // El "sobre de semillas": así se ve cada producto del catálogo.
 // Cada categoría tiene su color y su ilustración.
 
+import { useState } from 'react';
+
 import { pesos } from '../utilidades/formato.js';
 
 const ESTILOS = {
@@ -66,6 +68,24 @@ export function Ilustracion({ estilo, className = '' }) {
   );
 }
 
+// La foto del producto. Si no tiene, o si la dirección no carga, se muestra la ilustración
+// de la categoría (así el catálogo nunca queda con un hueco).
+export function FotoProducto({ url, estilo, className = '', claseIlustracion = '' }) {
+  const [fallo, setFallo] = useState(false);
+  if (!url || fallo) return <Ilustracion estilo={estilo} className={claseIlustracion} />;
+  return <img src={url} alt="" loading="lazy" decoding="async" onError={() => setFallo(true)} className={`object-cover ${className}`} />;
+}
+
+// Foto pequeña (carrito, lista de productos del administrador).
+export function Miniatura({ categoria, imagen, className = 'size-14 rounded-2xl' }) {
+  const estilo = estiloCategoria(categoria);
+  return (
+    <span className={`flex shrink-0 items-center justify-center overflow-hidden ${className}`} style={{ backgroundColor: estilo.fondo }}>
+      <FotoProducto key={imagen} url={imagen} estilo={estilo} className="size-full" claseIlustracion="h-[78%]" />
+    </span>
+  );
+}
+
 function AvisoStock({ producto, estilo }) {
   if (producto.estado_stock === 'agotado') {
     return (
@@ -96,9 +116,18 @@ export default function Sobre({ producto, accion, nota }) {
 
   return (
     <article className="sobre flex flex-col" aria-label={`${producto.nombre} ${producto.presentacion}`}>
-      <div className="relative h-[124px] shrink-0" style={{ backgroundColor: estilo.fondo }}>
-        <Ilustracion estilo={estilo} className={`absolute inset-x-0 bottom-1 mx-auto h-[92px] ${agotado ? 'opacity-45 grayscale' : ''}`} />
-        <span className="absolute right-3 top-4 text-[13px] font-semibold" style={{ color: estilo.tinta }}>
+      <div className="relative h-[124px] shrink-0 overflow-hidden" style={{ backgroundColor: estilo.fondo }}>
+        <FotoProducto
+          key={producto.imagen_url}
+          url={producto.imagen_url}
+          estilo={estilo}
+          className={`absolute inset-0 size-full ${agotado ? 'opacity-55 grayscale' : ''}`}
+          claseIlustracion={`absolute inset-x-0 bottom-1 mx-auto h-[92px] ${agotado ? 'opacity-45 grayscale' : ''}`}
+        />
+        <span
+          className="absolute right-3 top-4 rounded-full bg-crema-claro/85 px-2.5 py-0.5 text-[13px] font-semibold"
+          style={{ color: estilo.tinta }}
+        >
           {producto.presentacion}
         </span>
         <AvisoStock producto={producto} estilo={estilo} />

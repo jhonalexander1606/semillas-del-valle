@@ -134,6 +134,35 @@ Esto pasa de tres formas:
 
 Las horas de reserva, el mínimo de stock de la alerta y los días de alerta de vencimiento se cambian en `.env`.
 
+## Fotos de los productos
+
+Cada producto tiene un campo `imagen_url` con la dirección de una foto. El administrador la pega al crear o editar
+el producto; si la deja vacía, o si la foto no carga, se muestra el dibujo de la categoría. Se guarda la dirección y
+no el archivo porque el disco del plan gratuito de Render se borra en cada despliegue.
+
+Las fotos de los productos de demostración son de [Wikimedia Commons](https://commons.wikimedia.org) y se usan con
+su licencia Creative Commons (la migración `catalogo/0003_fotos_demo` se las pone a la base de datos ya desplegada):
+
+| Producto | Autor | Licencia |
+|---|---|---|
+| Maracuyá amarillo | John Ocampo | CC BY-SA 4.0 |
+| Papaya Tainung | Emke Dénes | CC BY-SA 4.0 |
+| Lulo de Castilla | Dick Culbert | CC BY 2.0 |
+| Sandía Charleston Gray | Suyash Dwivedi | CC BY-SA 4.0 |
+| Melón Cantaloupe | Tiia Monto | CC BY-SA 3.0 |
+| Tomate chonto | domdomegg | CC BY 4.0 |
+| Lechuga Batavia | Ritzylaura | CC BY-SA 4.0 |
+| Cebolla larga | Genmewcaugsa | CC BY-SA 3.0 |
+| Pimentón California Wonder | Gaurav Dhwaj Khadka | CC BY-SA 4.0 |
+| Cilantro | Josef Schlaghecken | CC BY-SA 4.0 |
+| Zanahoria Chantenay | Forest y Kim Starr | CC BY 2.0 |
+| Pasto Brachiaria decumbens | Harry Rose | CC BY 2.0 |
+| Pasto Mombaza | Forest y Kim Starr | CC BY 3.0 |
+| Sorgo forrajero | Pethan | CC BY-SA 3.0 |
+| Maíz forrajero | Christian Fischer | CC BY-SA 3.0 |
+| Sustrato para germinación | Shixart1985 | CC BY 2.0 |
+| Bandeja germinadora 72 cavidades | Pascal Kings | CC BY 4.0 |
+
 ## API
 
 Todas las rutas empiezan por `/api/`. Salvo el login y el registro, piden el encabezado `Authorization: Bearer <token>`.

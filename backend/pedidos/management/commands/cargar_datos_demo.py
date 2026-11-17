@@ -16,6 +16,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
+from catalogo.fotos import foto_demo
 from catalogo.models import Categoria, Marca, Producto
 from pedidos.models import DetallePedido, Pedido
 from usuarios.models import Usuario
@@ -150,6 +151,7 @@ class Command(BaseCommand):
                 nombre=nombre, categoria=categorias[categoria], marca=marcas[marca],
                 contenido=Decimal(contenido), unidad_medida=unidad, precio_unitario=Decimal(precio),
                 fecha_vencimiento=hoy + timedelta(days=vence) if vence else None,
+                imagen_url=foto_demo(nombre),
             )
             productos.append(producto)
             finales[producto.pk] = disponible

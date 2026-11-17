@@ -7,7 +7,7 @@ import Dialogo from '../../componentes/Dialogo.jsx';
 import Encabezado from '../../componentes/Encabezado.jsx';
 import Icono from '../../componentes/Icono.jsx';
 import PantallaCarga from '../../componentes/PantallaCarga.jsx';
-import { estiloCategoria, Ilustracion } from '../../componentes/Sobre.jsx';
+import { Miniatura } from '../../componentes/Sobre.jsx';
 import { useCarrito } from '../../sesion/CarritoContext.jsx';
 import { cifra, contar, fechaHora, pesos } from '../../utilidades/formato.js';
 
@@ -15,15 +15,6 @@ const BOTON_PRINCIPAL =
   'inline-flex h-12 items-center justify-center gap-2 rounded-full bg-verde px-6 text-[15px] font-semibold text-white shadow-[0_10px_22px_rgba(46,111,79,0.22)] transition-colors hover:bg-verde-oscuro disabled:opacity-60';
 const BOTON_SECUNDARIO =
   'inline-flex h-12 items-center justify-center rounded-full border border-borde-input bg-white px-6 text-[15px] font-semibold text-tinta-media hover:bg-crema';
-
-export function Miniatura({ categoria, className = 'size-14' }) {
-  const estilo = estiloCategoria(categoria);
-  return (
-    <span className={`flex shrink-0 items-center justify-center rounded-2xl ${className}`} style={{ backgroundColor: estilo.fondo }}>
-      <Ilustracion estilo={estilo} className="h-[78%]" />
-    </span>
-  );
-}
 
 // «Visualizar carrito» → «Confirmar pedido» o «Cancelar pedido».
 export default function Carrito() {
@@ -91,7 +82,7 @@ export default function Carrito() {
       <>
         <Encabezado antetitulo="Sin productos apartados" titulo="Carrito" />
         <section className="flex flex-col items-center rounded-3xl border border-dashed border-borde bg-crema-claro px-8 py-14 text-center">
-          <Miniatura categoria="Hortalizas" className="size-20" />
+          <Miniatura categoria="Hortalizas" className="size-20 rounded-2xl" />
           <p className="mt-5 font-titulos text-2xl font-semibold text-tinta-titulo">Tu carrito está vacío</p>
           <p className="mt-2 max-w-[44ch] text-tinta-suave">
             Lo que agregues desde el catálogo queda apartado para ti mientras decides.
@@ -113,7 +104,7 @@ export default function Carrito() {
           <ul className="divide-y divide-linea">
             {carrito.detalles.map((detalle) => (
               <li key={detalle.producto} className="flex flex-wrap items-center gap-x-4 gap-y-3 px-5 py-4 sm:px-6">
-                <Miniatura categoria={detalle.categoria} />
+                <Miniatura categoria={detalle.categoria} imagen={detalle.imagen_url} />
                 <div className="min-w-[160px] flex-1">
                   <p className="font-titulos text-[18px] font-semibold leading-snug text-tinta-titulo">
                     {detalle.nombre}{' '}
