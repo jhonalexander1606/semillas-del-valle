@@ -200,7 +200,7 @@ export default function Productos() {
                   <td className={TD}>
                     <span className="flex items-center gap-3">
                       <Miniatura categoria={p.categoria_nombre} imagen={p.imagen_url} className="size-11 rounded-xl" />
-                      <span>
+                      <span className="min-w-44">
                         <span className="font-semibold text-tinta">{p.nombre}</span> <span className="text-tinta-suave">{p.presentacion}</span>
                         <span className="block text-[13px] text-tinta-suave">{p.marca_nombre}</span>
                       </span>
